@@ -17,3 +17,16 @@ Sometimes you may need to create a Python venv environment so as not to break sy
 `python3 dsuc.py -u -d http://testsite.com -f`
  - DeepCrawl_l2 via aiohttp and Show Fuzzable Links 
 `python3 dsuc.py -u -d2 http://testsite.com -f`
+
+#### To understand how it works
+[Argparse](https://mkaz.blog/working-with-python/argparse)
+
+[Aiohttp multiple requests](https://www.slingacademy.com/article/python-aiohttp-sending-multiple-requests-concurrently/)
+
+[BS4 get links from page](https://www.geeksforgeeks.org/beautifulsoup-scraping-link-from-html/) (but instead of regex in script just if-elif-else)
+
+[how lxml parses html page](https://github.com/lxml/lxml/blob/master/doc/main.txt)
+
+[PEP 289 – Generator Expressions](https://peps.python.org/pep-0289/)
+
+[how works await asyncio.gather(*[])](https://docs.python.org/3/library/asyncio-task.html#awaitables)
