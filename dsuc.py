@@ -76,21 +76,18 @@ def level2(linklist, host_http):
             final_list.append(link)
     return final_list
 
-async def aio_xploit(link, session, host_http = None):
-    try:
-        async with session.get(link) as response:
-            res = await response.text()
-            soup = bs4.BeautifulSoup(res, 'lxml')
-            return extractor(soup, host_http)
-    except:
-        print("Bad url : ", link)
 
 async def aio_l2(linklist, host_http):
     async with aiohttp.ClientSession() as session:
-        final_list = await asyncio.gather(*[
-            aio_xploit(link, session, host_http) for link in linklist
-        ])
-        return set(final_list[0])
+        async def aio_xploit(link):
+            try:
+                res = await session.get(link)
+                soup = bs4.BeautifulSoup(await res.text(), 'lxml')
+                return extractor(soup, host_http)
+            except Exception as e:
+                print(f"Bits url: {link}: {e}"); return None 
+        # get unique links, including errors, works through list magic in python
+        return set([item for item in await asyncio.gather(*[aio_xploit(link) for link in linklist]) if item is not None][0])
 
 async def main():
     """ user interface through cli arguments """
