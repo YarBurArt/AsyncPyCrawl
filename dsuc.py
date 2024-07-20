@@ -19,7 +19,7 @@ def extractor(soup, host_http):
     for link in soup.find_all('a', href=True):
         is_http_www = 'http' in link['href'] or 'www' in link['href']
         is_good_attr = (len(link['href']) > 2) and ('#' not in link['href'])
-        
+
         if link['href'].startswith('/'): # for internal links and website buttons
             new_link = host_http + link['href'] if link['href'] not in all_links else None
         elif host_http in link['href']: # for links with current host_http
@@ -36,6 +36,7 @@ def extractor(soup, host_http):
 
         if new_link:
             all_links.append(new_link)
+
     return all_links
 
 def fuzzable_extract(linklist):
@@ -82,6 +83,7 @@ async def main():
         dest='fuzzable', action='store_true')
     parser.add_argument('-e', '--external', help='extract external',
         dest='external', action='store_true')
+    parser.add_argument('-o', '--output', help='save to file', dest='output')
     args = parser.parse_args()
     u = args.url
 
@@ -118,6 +120,12 @@ async def main():
         [print('>\t', link) for link in set(external) | links]
     elif args.external:
         print('\n\nNo EXTERNAL Link Found\n\n')
+
+    if args.output:
+        all_lists = [external, unknown, fuzzables]
+        with open(str(args.output), 'w') as file:  # write links line by line
+            file.writelines('\n'.join(str(item) for sublist in all_lists for item in sublist))
+        print("Lists saved to file successfully.")
 
 if __name__ == "__main__":
     BANNER = '''
