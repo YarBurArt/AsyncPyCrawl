@@ -20,16 +20,22 @@ def extractor(soup, host_http):
         is_http_www = 'http' in link['href'] or 'www' in link['href']
         is_good_attr = (len(link['href']) > 2) and ('#' not in link['href'])
 
-        if link['href'].startswith('/'): # for internal links and website buttons
-            new_link = host_http + link['href'] if link['href'] not in all_links else None
-        elif host_http in link['href']: # for links with current host_http
+        # internal links and website buttons
+        if link['href'].startswith('/'):
+            new_link = f"{host_http}{link['href']}" if link['href'] not in all_links else None
+        # links with current host_http
+        elif host_http in link['href']:
             new_link = link['href'] if link['href'] not in all_links else None
-        elif 'http://' in host_http:  # for other links via http and https
-            is_http_in_link = 'https://' + host_http.split('http://')[1] in link['href']
+        # other links via http and https divide
+        elif 'http://' in host_http:
+            https_host = f"https://{host_http.split('http://')[1]}"
+            is_http_in_link = https_host in link['href']
             new_link = link['href'] if is_http_in_link and link['href'] not in all_links else None
-        elif not is_http_www and is_good_attr: # this is not a reference to selectors
-            new_link = host_http + '/' + link['href'] if link['href'] not in all_links else None
-        elif len(link['href']) > 6:  # for external links
+        # not a reference to selectors
+        elif not is_http_www and is_good_attr:
+            new_link = f"{host_http}/{link['href']}" if link['href'] not in all_links else None
+        # external links
+        elif len(link['href']) > 6:
             external.append(link['href']);new_link = None
         else:
             unknown.append(link['href']);new_link = None
