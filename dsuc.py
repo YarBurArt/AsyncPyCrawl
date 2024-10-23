@@ -104,31 +104,27 @@ async def main():
     
     if args.deepcrawl:
         links = await aio_l2(links_g1, u)
-        message = '\n\nLINKS WITH DEEPCRAWL : \n\n' if len(links) > 1 else '\n\nNo Link Found\n\n'
-        [print('>\t', link) for link in links] if len(links) > 1 else print(message)
+        print('\n\nLINKS WITH DEEPCRAWL : \n\n' if len(links) > 1 else '\n\nNo Link Found\n\n')
+        [print('>\t', link) for link in links]
     elif args.deepcrawl2:
         links_l1 = await aio_l2(links_g1, u)
         print('\n\nLinks l1 found\n\n')
         links_l2 = await aio_l2(links_l1, u)
         links_l3 = await aio_l2(set(external), u)
         links = links_l1 | links_l2 | links_l3
-        message = '\n\nLINKS WITH L3 DEEPCRAWL : \n\n' if len(links) > 1 else '\n\nNo Link Found\n\n'
-        [print('>\t', link) for link in links] if len(links) > 1 else print(message)
+        print('\n\nLINKS WITH L1-L3 DEEPCRAWL : \n\n' if len(links) > 1 else '\n\nNo Link Found\n\n')
+        [print('>\t', link) for link in links]
     else:
-        message = '\n\nLINKS : \n\n' if len(links_g1) > 1 else '\n\nNo Link Found\n\n'
-        [print('>\t', link) for link in links_g1] if len(links_g1) > 1 else print(message)
+        print('\n\nLINKS : \n\n' if len(links_g1) > 1 else '\n\nNo Link Found\n\n')
+        [print('>\t', link) for link in links_g1]
 
     if args.fuzzable and len(links) > 1 and len(fuzzable_links := fuzzable_extract(links)) > 1:
-        print('\n\nFUZZABLE LINKS : \n\n')
+        print('\n\nFUZZABLE LINKS : \n\n' if len(fuzzable_links) > 1 else '\n\nNo Fuzzable Link Found\n\n')
         [print('>\t', link) for link in fuzzable_links]
-    elif args.fuzzable:
-        print('\n\nNo Fuzzable Link Found\n\n')
 
-    if args.external and len(external) > 1:
-        print('\n\nEXTERNAL LINKS : \n\n')
+    if args.external:
+        print('\n\nEXTERNAL LINKS : \n\n' if len(external) > 1 else '\n\nNo EXTERNAL Link Found\n\n')
         [print('>\t', link) for link in set(external) | links]
-    elif args.external:
-        print('\n\nNo EXTERNAL Link Found\n\n')
 
     if args.output:
         all_lists = [external, unknown, fuzzables]
