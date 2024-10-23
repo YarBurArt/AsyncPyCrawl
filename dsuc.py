@@ -12,7 +12,7 @@ import argparse, sys, requests, bs4, asyncio, aiohttp
 
 external, unknown, fuzzables = [], [], []
 
-def extractor(soup, host_http):
+async def extractor(soup, host_http):
     """ receives bs4 object and in order according 
     to the conditions gets from the page all link"""
     all_links = []
@@ -49,15 +49,16 @@ def fuzzable_extract(linklist):
     """ check for uri parameters """
     return [link for link in linklist if "=" in link]
 
-def xploit(link, host_http = None):
+async def xploit(link, host_http = None):
     """ wrapper with page loading into memory, returns all links """
     if host_http is None:
         host_http = link
     res = requests.get(link, allow_redirects=True, timeout=5)
     soup = bs4.BeautifulSoup(res.text, 'lxml')
-    return extractor(soup, host_http)
+    res = await extractor(soup, host_http)
+    return res
 
-def level2(linklist, host_http):
+async def level2(linklist, host_http):
     """ check the child's unique links of links """
     final_list = set()
     [final_list.add(in_links) or print("Appended", in_links) for link in linklist for in_links in xploit(link, host_http) if in_links not in final_list]
@@ -97,13 +98,16 @@ async def main():
         sys.exit(0)
     if 'http' not in u:
         u = 'http://' + u
-
+    
+    links_g0 = await asyncio.gather(xploit(u))
+    links_g1 = list(links_g0)[0]
+    
     if args.deepcrawl:
-        links = await aio_l2(xploit(u), u)
+        links = await aio_l2(links_g1, u)
         message = '\n\nLINKS WITH DEEPCRAWL : \n\n' if len(links) > 1 else '\n\nNo Link Found\n\n'
         [print('>\t', link) for link in links] if len(links) > 1 else print(message)
     elif args.deepcrawl2:
-        links_l1 = await aio_l2(xploit(u), u)
+        links_l1 = await aio_l2(links_g1, u)
         print('\n\nLinks l1 found\n\n')
         links_l2 = await aio_l2(links_l1, u)
         links_l3 = await aio_l2(set(external), u)
@@ -111,9 +115,8 @@ async def main():
         message = '\n\nLINKS WITH L3 DEEPCRAWL : \n\n' if len(links) > 1 else '\n\nNo Link Found\n\n'
         [print('>\t', link) for link in links] if len(links) > 1 else print(message)
     else:
-        links = xploit(u)
-        message = '\n\nLINKS : \n\n' if len(links) > 1 else '\n\nNo Link Found\n\n'
-        [print('>\t', link) for link in links] if len(links) > 1 else print(message)
+        message = '\n\nLINKS : \n\n' if len(links_g1) > 1 else '\n\nNo Link Found\n\n'
+        [print('>\t', link) for link in links_g1] if len(links_g1) > 1 else print(message)
 
     if args.fuzzable and len(links) > 1 and len(fuzzable_links := fuzzable_extract(links)) > 1:
         print('\n\nFUZZABLE LINKS : \n\n')
